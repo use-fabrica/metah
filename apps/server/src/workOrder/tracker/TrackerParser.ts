@@ -42,7 +42,7 @@ export const parseSpec = (content: string | undefined): ParseResult<ParsedSpec> 
   if (!heading) {
     return err(`${SPEC_PATH} must start with a \`# <title>\` heading; none found.`);
   }
-  const title = heading[1].trim();
+  const title = (heading[1] ?? "").trim();
   const body = content.slice((heading.index ?? 0) + heading[0].length).trim();
   if (title === "" || body === "") {
     return err(
@@ -73,7 +73,7 @@ export const parseTicketGraph = (
       continue;
     }
     const number = Number(heading[1]);
-    const title = heading[2].trim();
+    const title = (heading[2] ?? "").trim();
     const slug = fileName.replace(/^\d+-/, "").replace(/\.md$/, "");
     if (String(number).padStart(2, "0") !== String(Number(fileNumber)).padStart(2, "0")) {
       errors.push(
@@ -141,7 +141,7 @@ export const parseTicketGraph = (
 
 const listItems = (section: string): string[] =>
   [...section.matchAll(/^\s*(?:[-*+]\s+)(.+)$/gm)]
-    .map((m) => m[1].trim())
+    .map((m) => (m[1] ?? "").trim())
     .filter((text) => text !== "" && !/^none\b/i.test(text));
 
 export const parseReviewFindings = (content: string | undefined): ParseResult<ParsedReview> => {
@@ -155,12 +155,12 @@ export const parseReviewFindings = (content: string | undefined): ParseResult<Pa
       `${REVIEW_PATH} must contain \`## Standards\` and \`## Spec\` sections; ${standardsAt === -1 ? "`## Standards`" : "`## Spec`"} is missing.`,
     );
   }
-  const sections: Array<{ axis: "standards" | "spec"; at: number }> = [
-    { axis: "standards", at: standardsAt },
-    { axis: "spec", at: specAt },
+  const sections = [
+    { axis: "standards" as const, at: standardsAt },
+    { axis: "spec" as const, at: specAt },
   ].sort((a, b) => a.at - b.at);
   const findings = sections.flatMap((section, i) => {
-    const end = i + 1 < sections.length ? sections[i + 1].at : content.length;
+    const end = sections[i + 1]?.at ?? content.length;
     return listItems(content.slice(section.at, end)).map((text) => ({ axis: section.axis, text }));
   });
   return ok({ text: content.trim(), findings });

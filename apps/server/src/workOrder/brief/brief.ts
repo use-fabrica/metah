@@ -16,7 +16,7 @@ export { RUN_COMPLETE_SENTINEL };
 
 const MERGE_RULE = `Before finishing, run \`git merge <integration-branch>\` to merge the Integration Branch tip into your branch and resolve any conflicts yourself.`;
 
-const RUN_COMPLETE_RULE = `End your final message with the exact line \`${RUN_COMPLETE_SENTINEL}\` — and only then — when the Ticket is done and committed.`;
+const RUN_COMPLETE_RULE = `End your final message with the exact line \`${RUN_COMPLETE_SENTINEL}\`, and only then, when the Ticket is done and committed.`;
 
 function bundleMarkdown(bundle: ResolvedBundle): string {
   const sections: Array<string> = [];
@@ -37,7 +37,7 @@ function briefMarkdown(options: {
   return [
     `# ${options.stage} Brief`,
     "",
-    "Your instructions and reference material follow. The Skill Pack sections below are the skills this Stage runs — follow them as if they were loaded as skills; you do not need to load anything yourself.",
+    "Your instructions and reference material follow. The Skill Pack sections below are the skills this Stage runs, follow them as if they were loaded as skills; you do not need to load anything yourself.",
     "",
     bundleMarkdown(options.bundle),
     trackerConventionMarkdown(),
@@ -172,7 +172,7 @@ export const renderReviewBrief = (i: {
 
 export const renderUnparkMessage = (i: { question: string; verdict: string }): string =>
   [
-    "You were Parked with a question. The user has answered — continue with this verdict.",
+    "You were Parked with a question. The user has answered, continue with this verdict.",
     "",
     `**Question:** ${i.question}`,
     "",

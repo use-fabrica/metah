@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off - synchronous path/fs helpers in a pure module or fixture.
 /**
  * Generates `generatedSkillPack.ts` from the repo-pinned `.agents/skills/` and
  * `skills-lock.json` so the bundled server ships the Skill Pack without ever
@@ -6,11 +7,11 @@
  * Called from `vite.config.ts` before every build/test run; the generated file
  * is committed and only rewritten when it differs.
  */
-import * as Fs from "node:fs";
+import * as NodeFS from "node:fs";
 import * as NodePath from "node:path";
-import * as NodeUrl from "node:url";
+import * as NodeURL from "node:url";
 
-const moduleDir = NodePath.dirname(NodeUrl.fileURLToPath(import.meta.url));
+const moduleDir = NodePath.dirname(NodeURL.fileURLToPath(import.meta.url));
 const repoRoot = NodePath.resolve(moduleDir, "../../../../..");
 
 export interface GeneratedSkillFile {
@@ -25,7 +26,7 @@ export interface GeneratedSkill {
 }
 
 function listFilesRecursive(directory: string): Array<string> {
-  const entries = Fs.readdirSync(directory, { withFileTypes: true }).sort((a, b) =>
+  const entries = NodeFS.readdirSync(directory, { withFileTypes: true }).sort((a, b) =>
     a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
   );
   const files: Array<string> = [];
@@ -42,7 +43,7 @@ function listFilesRecursive(directory: string): Array<string> {
 
 export function collectBundledSkills(): Array<GeneratedSkill> {
   const lockPath = NodePath.join(repoRoot, "skills-lock.json");
-  const lock = JSON.parse(Fs.readFileSync(lockPath, "utf8")) as {
+  const lock = JSON.parse(NodeFS.readFileSync(lockPath, "utf8")) as {
     skills: Record<string, { computedHash: string }>;
   };
   const skillsRoot = NodePath.join(repoRoot, ".agents", "skills");
@@ -54,7 +55,7 @@ export function collectBundledSkills(): Array<GeneratedSkill> {
       lockHash: lock.skills[name]?.computedHash ?? "",
       files: listFilesRecursive(NodePath.join(skillsRoot, name)).map((absolutePath) => ({
         path: NodePath.relative(NodePath.join(skillsRoot, name), absolutePath).replace(/\\/g, "/"),
-        content: Fs.readFileSync(absolutePath, "utf8"),
+        content: NodeFS.readFileSync(absolutePath, "utf8"),
       })),
     }));
 }
@@ -82,9 +83,9 @@ export const BUNDLED_SKILLS: ReadonlyArray<BundledSkill> = ${JSON.stringify(skil
 export function generateSkillPackModule(): boolean {
   const outputPath = NodePath.join(moduleDir, "generatedSkillPack.ts");
   const rendered = renderModule(collectBundledSkills());
-  if (Fs.existsSync(outputPath) && Fs.readFileSync(outputPath, "utf8") === rendered) {
+  if (NodeFS.existsSync(outputPath) && NodeFS.readFileSync(outputPath, "utf8") === rendered) {
     return false;
   }
-  Fs.writeFileSync(outputPath, rendered);
+  NodeFS.writeFileSync(outputPath, rendered);
   return true;
 }

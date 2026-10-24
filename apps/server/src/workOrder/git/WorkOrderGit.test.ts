@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off - synchronous path/fs helpers in a pure module or fixture.
 import * as NodeFS from "node:fs";
 import * as NodeOS from "node:os";
 import * as NodePath from "node:path";
@@ -5,6 +6,7 @@ import * as NodePath from "node:path";
 import * as NodeServices from "@effect/platform-node/NodeServices";
 import * as FileSystem from "effect/FileSystem";
 import * as Cause from "effect/Cause";
+import * as Clock from "effect/Clock";
 import * as Effect from "effect/Effect";
 import * as Exit from "effect/Exit";
 import * as Layer from "effect/Layer";
@@ -190,7 +192,10 @@ describe("WorkOrderGit", () => {
     Effect.gen(function* () {
       const workOrderGit = yield* WorkOrderGit.WorkOrderGit;
       const repo = yield* makeRepo();
-      const worktreePath = NodePath.join(NodeOS.tmpdir(), `t3-workorder-git-wt-${Date.now()}`);
+      const worktreePath = NodePath.join(
+        NodeOS.tmpdir(),
+        `t3-workorder-git-wt-${yield* Clock.currentTimeMillis}`,
+      );
       NodeFS.mkdirSync(worktreePath);
       const resolvedWorktreePath = NodeFS.realpathSync(worktreePath);
       yield* git(repo, ["worktree", "add", "-b", "metah/spec/run-2", resolvedWorktreePath, "main"]);
