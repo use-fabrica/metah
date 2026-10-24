@@ -6,6 +6,11 @@ import { loadRepoEnv } from "../../scripts/lib/public-config.ts";
 import rootPackageJson from "../../package.json" with { type: "json" };
 import packageJson from "./package.json" with { type: "json" };
 import { WeightedShardSequencer } from "./src/testUtils/weightedShardSequencer.ts";
+import { generateSkillPackModule } from "./src/workOrder/skillPack/generateSkillPack.ts";
+
+// Regenerate the bundled Skill Pack (from `.agents/skills` + skills-lock.json)
+// before any build/test so the packaged server never reads `.agents` at runtime.
+generateSkillPackModule();
 
 // NSIS install time tracks file count, not bytes.
 import {
