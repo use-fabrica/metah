@@ -95,6 +95,9 @@ import {
   ThreadId,
   type TerminalMetadataStreamEvent,
   type PullRequestRef,
+  WORK_ORDER_WS_METHODS,
+  WorkOrderCommandRejectedError,
+  WorkOrderNotFoundError,
   WS_METHODS,
   WsRpcGroup,
 } from "@t3tools/contracts";
@@ -159,6 +162,9 @@ import {
 } from "./orchestration-v2/WireProjection.ts";
 import * as ProjectStore from "./orchestration-v2/ProjectStore.ts";
 import * as ThreadSearch from "./orchestration-v2/ThreadSearch.ts";
+import * as WorkOrderOrchestrator from "./workOrder/WorkOrderOrchestrator.ts";
+import * as WorkOrderRuntime from "./workOrder/WorkOrderRuntime.ts";
+import * as WorkOrderStore from "./workOrder/WorkOrderStore.ts";
 import * as OrchestrationEventStore from "./persistence/OrchestrationEventStore.ts";
 import { userFacingDispatchErrorMessage } from "./orchestration-v2/UserFacingErrors.ts";
 import * as ProviderRegistry from "./provider/ProviderRegistry.ts";
@@ -1257,6 +1263,8 @@ export const layerWsRpc = (
       const commandOutputHub = yield* CommandOutputHub.CommandOutputHub;
       const providerSessionManager = yield* ProviderSessionManager.ProviderSessionManagerV2;
       const scheduledTasks = yield* ScheduledTasks.ScheduledTaskService;
+      const workOrders = yield* WorkOrderOrchestrator.WorkOrderOrchestrator;
+      const workOrderStore = yield* WorkOrderStore.WorkOrderStore;
       const secretRequests = yield* SecretRequests.SecretRequests;
       const pullRequests = yield* PullRequestService.PullRequestService;
       const reviewGuides = yield* PullRequestReviewGuideService.PullRequestReviewGuideService;
@@ -2093,6 +2101,25 @@ export const layerWsRpc = (
               Effect.as(commandOutputHub.subscribe(input)),
             ),
           ),
+        [WORK_ORDER_WS_METHODS.dispatchCommand]: ({ command }) =>
+          Effect.annotateCurrentSpan({ "work_order.command_type": command.type }).pipe(
+            Effect.as(workOrders.dispatch(command)),
+            Effect.flatten,
+            Effect.mapError(
+              (error): WorkOrderCommandRejectedError | WorkOrderNotFoundError =>
+                error instanceof WorkOrderCommandRejectedError ||
+                error instanceof WorkOrderNotFoundError
+                  ? error
+                  : new WorkOrderCommandRejectedError({
+                      commandId: command.commandId,
+                      reason: "WorkOrder storage failure.",
+                    }),
+            ),
+          ),
+        [WORK_ORDER_WS_METHODS.subscribeList]: (input) =>
+          WorkOrderRuntime.subscribeList(workOrderStore, input),
+        [WORK_ORDER_WS_METHODS.subscribeDetail]: (input) =>
+          WorkOrderRuntime.subscribeDetail(workOrderStore, input),
         [WS_METHODS.scheduledTasksList]: (_input) =>
           scheduledTasks.list().pipe(Effect.map(withVisibleWebhookUrls)),
         [WS_METHODS.scheduledTasksSubscribe]: (_input) =>

@@ -28,6 +28,7 @@ import {
   EnvironmentAuthorizationError,
   RpcScopeAuthorization,
   WS_METHODS,
+  WORK_ORDER_RPC_REQUIRED_SCOPES,
   WsRpcGroup,
 } from "@t3tools/contracts";
 import * as Effect from "effect/Effect";
@@ -209,6 +210,7 @@ export const RPC_REQUIRED_SCOPES = {
   [WS_METHODS.subscribeServerLifecycle]: AuthOrchestrationReadScope,
   [WS_METHODS.subscribeAuthAccess]: AuthAccessReadScope,
   [WS_METHODS.subscribeBackgroundPolicy]: AuthOrchestrationReadScope,
+  ...WORK_ORDER_RPC_REQUIRED_SCOPES,
 } as const satisfies Readonly<Record<WsRpcMethod, AuthEnvironmentScope>>;
 
 export function requiredScopeForRpcMethod(method: string): AuthEnvironmentScope {
