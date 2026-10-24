@@ -14,9 +14,9 @@ export const WorkOrderId = TrimmedNonEmptyString.pipe(Schema.brand("WorkOrderId"
 export type WorkOrderId = typeof WorkOrderId.Type;
 
 /** Slug portion of the idea; kebab-case, unique per project, ≤40 chars. */
-export const WorkOrderSlug = TrimmedNonEmptyString.pipe(
-  Schema.pattern(/^[a-z0-9]+(-[a-z0-9]+)*$/, { description: "kebab-case slug" }),
-  Schema.maxLength(40),
+export const WorkOrderSlug = TrimmedNonEmptyString.check(
+  Schema.isPattern(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  Schema.isMaxLength(40),
 );
 export type WorkOrderSlug = typeof WorkOrderSlug.Type;
 
@@ -50,8 +50,8 @@ export const WorkOrderModelSelection = Schema.Struct({
 });
 export type WorkOrderModelSelection = typeof WorkOrderModelSelection.Type;
 
-export const IntegrationBranch = TrimmedNonEmptyString.pipe(
-  Schema.pattern(/^metah\/[a-z0-9]+(-[a-z0-9]+)*$/),
+export const IntegrationBranch = TrimmedNonEmptyString.check(
+  Schema.isPattern(/^metah\/[a-z0-9]+(-[a-z0-9]+)*$/),
 );
 export type IntegrationBranch = typeof IntegrationBranch.Type;
 
@@ -64,7 +64,7 @@ export const WorkOrderCreateCommand = Schema.Struct({
   commandId: CommandId,
   workOrderId: WorkOrderId,
   projectId: ProjectId,
-  idea: TrimmedNonEmptyString.pipe(Schema.maxLength(20_000)),
+  idea: TrimmedNonEmptyString.check(Schema.isMaxLength(20_000)),
   modelSelection: WorkOrderModelSelection,
 });
 export type WorkOrderCreateCommand = typeof WorkOrderCreateCommand.Type;
@@ -417,13 +417,13 @@ export const WorkOrderRpcs = [
 ] as const;
 
 /** Server mirror lives in apps/server/src/auth/RpcAuthorization.ts. */
-export const WORK_ORDER_RPC_REQUIRED_SCOPES: Record<string, AuthEnvironmentScope> = {
+export const WORK_ORDER_RPC_REQUIRED_SCOPES = {
   [WORK_ORDER_WS_METHODS.dispatchCommand]: AuthOrchestrationOperateScope,
   [WORK_ORDER_WS_METHODS.subscribeList]: AuthOrchestrationReadScope,
   [WORK_ORDER_WS_METHODS.subscribeDetail]: AuthOrchestrationReadScope,
-};
+} as const satisfies Record<string, AuthEnvironmentScope>;
 
 /** Client-side guarded subset (see clientRpcPermissions.ts). */
-export const WORK_ORDER_CLIENT_GUARDED_RPC_SCOPES: Record<string, AuthEnvironmentScope> = {
+export const WORK_ORDER_CLIENT_GUARDED_RPC_SCOPES = {
   [WORK_ORDER_WS_METHODS.dispatchCommand]: AuthOrchestrationOperateScope,
-};
+} as const satisfies Record<string, AuthEnvironmentScope>;
