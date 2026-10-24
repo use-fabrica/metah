@@ -1,5 +1,8 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import * as Cause from "effect/Cause";
+import * as Option from "effect/Option";
 import {
+  CommandId,
   WORK_ORDER_WS_METHODS,
   WorkOrderId,
   type EnvironmentId,
@@ -8,6 +11,7 @@ import {
   type WorkOrderDetailStreamItem,
   type WorkOrderListItem,
   type WorkOrderListStreamItem,
+  type WorkOrderCommand,
   type WorkOrderStage,
 } from "@t3tools/contracts";
 import {
@@ -22,6 +26,9 @@ import * as Stream from "effect/Stream";
 
 import { connectionAtomRuntime } from "~/connection/runtime";
 import { useEnvironmentQuery } from "~/state/query";
+import { useAtomCommand } from "~/state/use-atom-command";
+import { randomUUID } from "~/lib/utils";
+import { stackedThreadToast, toastManager } from "~/components/ui/toast";
 
 const isWorkOrderId = Schema.is(WorkOrderId);
 
@@ -283,4 +290,69 @@ export function useWorkOrder(
       : workOrderDetailAtom({ environmentId, input: { workOrderId } }),
   );
   return { detail: view.data?.detail ?? null, error: view.error };
+}
+
+// ---------------------------------------------------------------------------
+// Command dispatch
+// ---------------------------------------------------------------------------
+
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
+
+/** A WorkOrder command without its client-generated `commandId`. */
+export type WorkOrderCommandInput = DistributiveOmit<WorkOrderCommand, "commandId">;
+
+/** Extracts the human-readable reason from a rejected command result. */
+export function workOrderCommandErrorText(result: {
+  readonly _tag: string;
+  readonly cause: Cause.Cause<unknown>;
+}): string | null {
+  if (result._tag !== "Failure") return null;
+  const error = Option.getOrNull(Cause.findErrorOption(result.cause));
+  if (error === null) return null;
+  if (
+    typeof error === "object" &&
+    "_tag" in error &&
+    error._tag === "WorkOrderCommandRejectedError" &&
+    "reason" in error
+  ) {
+    return String(error.reason);
+  }
+  return error instanceof Error ? error.message : "Command failed.";
+}
+
+/**
+ * Dispatches a WorkOrder command, generating a fresh `commandId` and reporting
+ * rejections (WorkOrderCommandRejectedError.reason) via toast. No-ops (resolves
+ * `false`) when no environment is connected.
+ */
+export function useWorkOrderDispatch(
+  environmentId: EnvironmentId | null,
+): (command: WorkOrderCommandInput) => Promise<boolean> {
+  const dispatch = useAtomCommand(workOrderDispatchCommand, { reportFailure: false });
+  return useCallback(
+    (command: WorkOrderCommandInput) => {
+      if (environmentId === null) return Promise.resolve(false);
+      // Union spread loses the discriminator fit; the runtime shape is a valid WorkOrderCommand.
+      const fullCommand = {
+        ...command,
+        commandId: CommandId.make(randomUUID()),
+      } as WorkOrderCommand;
+      return dispatch({
+        environmentId,
+        input: { command: fullCommand },
+      }).then((result) => {
+        if (result._tag === "Success") return true;
+        const text = workOrderCommandErrorText(result);
+        toastManager.add(
+          stackedThreadToast({
+            type: "error",
+            title: "WorkOrder command rejected",
+            description: text ?? "The command could not be applied.",
+          }),
+        );
+        return false;
+      });
+    },
+    [dispatch, environmentId],
+  );
 }
