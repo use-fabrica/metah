@@ -12,5 +12,3 @@ export const BOARD_STAGES: ReadonlyArray<{ stage: WorkOrderStage; label: string 
   { stage: "review", label: "Review" },
   { stage: "done", label: "Done" },
 ];
-
-export const PARKED_STAGE: WorkOrderStage = "parked";
