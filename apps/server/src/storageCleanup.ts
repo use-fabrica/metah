@@ -376,6 +376,20 @@ const make = Effect.gen(function* () {
         pathKey(yield* fs.realPath(resolved).pipe(Effect.orElseSucceed(() => resolved))),
       );
     }
+    // WorkOrder worktrees (metah workflow layer) are exempt from cleanup until
+    // their WorkOrder is discarded; the table may not exist on stock installs.
+    const workOrderRows = yield* sql<{ worktreePath: string }>`
+      SELECT DISTINCT worktree_path AS "worktreePath"
+      FROM work_orders
+      WHERE worktree_path IS NOT NULL AND stage <> 'discarded'
+    `.pipe(NodeSqliteClient.readOnly, Effect.orElseSucceed(() => []));
+    for (const row of workOrderRows) {
+      const resolved = path.resolve(row.worktreePath);
+      referenced.add(pathKey(resolved));
+      referenced.add(
+        pathKey(yield* fs.realPath(resolved).pipe(Effect.orElseSucceed(() => resolved))),
+      );
+    }
     const referencedAncestors = new Set<string>();
     for (let ancestor of referenced) {
       while (roots.some((root) => inside(root, ancestor))) {
