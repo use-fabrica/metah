@@ -28,11 +28,11 @@ it("parses a valid ticket graph and returns tickets sorted by number", () => {
       result.value.map((t) => t.number),
       [1, 2, 3],
     );
-    assert.equal(result.value[0].slug, "first");
-    assert.equal(result.value[0].title, "First thing");
-    assert.deepEqual(result.value[0].blockedBy, []);
-    assert.deepEqual(result.value[1].blockedBy, [1, 3]);
-    assert.deepEqual(result.value[2].blockedBy, [1]);
+    assert.equal(result.value[0]?.slug, "first");
+    assert.equal(result.value[0]?.title, "First thing");
+    assert.deepEqual(result.value[0]?.blockedBy, []);
+    assert.deepEqual(result.value[1]?.blockedBy, [1, 3]);
+    assert.deepEqual(result.value[2]?.blockedBy, [1]);
   }
 });
 
@@ -100,7 +100,7 @@ it("rejects a missing spec file", () => {
   const result = parseSpec(undefined);
   assert.isFalse(result.ok);
   if (!result.ok) {
-    assert.isTrue(result.errors[0].includes("spec.md"));
+    assert.isTrue(result.errors[0]?.includes("spec.md") ?? false);
   }
 });
 

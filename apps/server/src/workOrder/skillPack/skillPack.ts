@@ -1,3 +1,4 @@
+// @effect-diagnostics nodeBuiltinImport:off - synchronous path/fs helpers in a pure module or fixture.
 import * as NodePath from "node:path";
 
 import { BUNDLED_SKILLS, type BundledSkill, type BundledSkillFile } from "./generatedSkillPack.ts";
@@ -65,7 +66,7 @@ function extractReferencedSkillNames(content: string): Set<string> {
       if (/tell the user to\s+(?:run|call|use)\b/i.test(context)) {
         continue;
       }
-      names.add(match[1]);
+      names.add(match[1] ?? "");
     }
   }
   return names;
@@ -75,7 +76,7 @@ function extractReferencedSiblingPaths(content: string): Set<string> {
   const paths = new Set<string>();
   for (const pattern of SIBLING_FILE_PATTERNS) {
     for (const match of content.matchAll(pattern)) {
-      paths.add(match[1]);
+      paths.add(match[1] ?? "");
     }
   }
   return paths;

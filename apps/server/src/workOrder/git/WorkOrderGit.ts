@@ -84,7 +84,7 @@ export class WorkOrderGit extends Context.Service<
       path: string,
     ) => Effect.Effect<boolean, GitCommandError>;
   }
->()("metah/workOrder/WorkOrderGit") {}
+>()("t3/workOrder/git/WorkOrderGit") {}
 
 const commandText = (args: ReadonlyArray<string>) => ["git", ...args].join(" ");
 
@@ -93,7 +93,7 @@ const gitError = (operation: string, cwd: string, args: ReadonlyArray<string>, s
     operation,
     command: commandText(args),
     cwd,
-    detail: stderr.trim() === "" ? `git ${args[0]} failed.` : stderr.trim().split("\n")[0],
+    detail: stderr.trim() === "" ? `git ${args[0]} failed.` : (stderr.trim().split("\n")[0] ?? ""),
   });
 
 export const make = Effect.gen(function* () {

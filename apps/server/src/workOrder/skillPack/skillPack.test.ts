@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test } from "@effect/vitest";
 
 import { resolveStageBundle, resolveStageBundleFrom } from "./skillPack.ts";
 

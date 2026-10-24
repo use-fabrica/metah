@@ -1,4 +1,4 @@
-import { expect, test } from "vitest";
+import { expect, test } from "@effect/vitest";
 
 import { DOMAIN_DIR, REVIEW_PATH, SPEC_PATH, TICKETS_DIR } from "../tracker/TrackerLayout.ts";
 import {
