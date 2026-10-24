@@ -35,6 +35,9 @@ export const detailFromListItem = (item: WorkOrderListItem): WorkOrderDetail =>
     parkedQuestion: null,
     tickets: [],
     specText: null,
+    specTitle: null,
+    reviewThreadId: null,
+    fixRun: null,
     reviewFindings: null,
     createdAt: item.createdAt,
   });
@@ -56,13 +59,11 @@ export const subscribeList = (
       Stream.concat(
         store.liveEvents.pipe(
           Stream.filter((event) => event.sequence > resumeFrom),
-          Stream.map(
-            (event): WorkOrderListStreamItemT => ({
-              type: "event",
-              sequence: event.sequence,
-              event: event.event,
-            }),
-          ),
+          Stream.map((event): WorkOrderListStreamItemT => ({
+            type: "event",
+            sequence: event.sequence,
+            event: event.event,
+          })),
         ),
       ),
     );
@@ -91,13 +92,11 @@ export const subscribeDetail = (
           Stream.filter(
             (event) => event.sequence > resumeFrom && event.event.workOrderId === input.workOrderId,
           ),
-          Stream.map(
-            (event): WorkOrderDetailStreamItemT => ({
-              type: "event",
-              sequence: event.sequence,
-              event: event.event,
-            }),
-          ),
+          Stream.map((event): WorkOrderDetailStreamItemT => ({
+            type: "event",
+            sequence: event.sequence,
+            event: event.event,
+          })),
         ),
       ),
     );

@@ -271,14 +271,57 @@ export const WorkOrderListItem = Schema.Struct({
 });
 export type WorkOrderListItem = typeof WorkOrderListItem.Type;
 
+export const WorkOrderRunKind = Schema.Literals(["run", "fix"]);
+export type WorkOrderRunKind = typeof WorkOrderRunKind.Type;
+
+/** States a Run can present to the client; `superseded` marks replaced attempts. */
+export const WorkOrderRunState = Schema.Literals([
+  "running",
+  "needs_input",
+  "failed",
+  "merged",
+  "superseded",
+]);
+export type WorkOrderRunState = typeof WorkOrderRunState.Type;
+
+/** Client-facing summary of a Run attempt on a Ticket (1-based attempt). */
+export const WorkOrderRunSummary = Schema.Struct({
+  runId: TrimmedNonEmptyString,
+  attempt: Schema.Int.check(Schema.isGreaterThan(0)),
+  kind: WorkOrderRunKind,
+  threadId: Schema.NullOr(ThreadId),
+  branch: TrimmedNonEmptyString,
+  state: WorkOrderRunState,
+  modelSelection: WorkOrderModelSelection,
+  startedAt: Schema.DateTimeUtc,
+});
+export type WorkOrderRunSummary = typeof WorkOrderRunSummary.Type;
+
+export const WorkOrderReviewFindingAxis = Schema.Literals(["standards", "spec"]);
+export type WorkOrderReviewFindingAxis = typeof WorkOrderReviewFindingAxis.Type;
+
+export const WorkOrderReviewFinding = Schema.Struct({
+  axis: WorkOrderReviewFindingAxis,
+  text: TrimmedNonEmptyString,
+});
+export type WorkOrderReviewFinding = typeof WorkOrderReviewFinding.Type;
+
 export const WorkOrderTicketGraphTicket = Schema.Struct({
   number: Schema.Int,
   slug: WorkOrderSlug,
   title: TrimmedNonEmptyString,
+  body: Schema.String,
   state: WorkOrderTicketState,
   blockedBy: Schema.Array(Schema.Int),
+  runs: Schema.Array(WorkOrderRunSummary),
 });
 export type WorkOrderTicketGraphTicket = typeof WorkOrderTicketGraphTicket.Type;
+
+export const WorkOrderReviewFindings = Schema.Struct({
+  text: TrimmedNonEmptyString,
+  findings: Schema.Array(WorkOrderReviewFinding),
+});
+export type WorkOrderReviewFindings = typeof WorkOrderReviewFindings.Type;
 
 /** Ticket Graph is populated by the Tickets stage (#8+); placeholder until then. */
 export const WorkOrderDetail = Schema.Struct({
@@ -296,7 +339,10 @@ export const WorkOrderDetail = Schema.Struct({
   parkedQuestion: Schema.NullOr(TrimmedNonEmptyString),
   tickets: Schema.Array(WorkOrderTicketGraphTicket),
   specText: Schema.NullOr(TrimmedNonEmptyString),
-  reviewFindings: Schema.NullOr(TrimmedNonEmptyString),
+  specTitle: Schema.NullOr(TrimmedNonEmptyString),
+  reviewThreadId: Schema.NullOr(ThreadId),
+  fixRun: Schema.NullOr(WorkOrderRunSummary),
+  reviewFindings: Schema.NullOr(WorkOrderReviewFindings),
   createdAt: Schema.DateTimeUtc,
 });
 export type WorkOrderDetail = typeof WorkOrderDetail.Type;
