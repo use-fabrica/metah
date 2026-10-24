@@ -32,8 +32,11 @@ import { Route as SettingsConnectionsRouteImport } from './routes/settings.conne
 import { Route as SettingsArchivedRouteImport } from './routes/settings.archived'
 import { Route as SettingsAppearanceRouteImport } from './routes/settings.appearance'
 import { Route as ProjectsProjectKeyRouteImport } from './routes/projects.$projectKey'
+import { Route as ChatWorkordersRouteImport } from './routes/_chat.workorders'
 import { Route as ChatPullRequestsRouteImport } from './routes/_chat.pull-requests'
 import { Route as ChatNewRouteImport } from './routes/_chat.new'
+import { Route as ChatWorkordersIndexRouteImport } from './routes/_chat.workorders.index'
+import { Route as ChatWorkordersWorkOrderIdRouteImport } from './routes/_chat.workorders.$workOrderId'
 import { Route as ChatDraftDraftIdRouteImport } from './routes/_chat.draft.$draftId'
 import { Route as ChatEnvironmentIdThreadIdRouteImport } from './routes/_chat.$environmentId.$threadId'
 
@@ -152,6 +155,11 @@ const ProjectsProjectKeyRoute = ProjectsProjectKeyRouteImport.update({
   path: '/projects/$projectKey',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatWorkordersRoute = ChatWorkordersRouteImport.update({
+  id: '/workorders',
+  path: '/workorders',
+  getParentRoute: () => ChatRoute,
+} as any)
 const ChatPullRequestsRoute = ChatPullRequestsRouteImport.update({
   id: '/pull-requests',
   path: '/pull-requests',
@@ -162,6 +170,17 @@ const ChatNewRoute = ChatNewRouteImport.update({
   path: '/new',
   getParentRoute: () => ChatRoute,
 } as any)
+const ChatWorkordersIndexRoute = ChatWorkordersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ChatWorkordersRoute,
+} as any)
+const ChatWorkordersWorkOrderIdRoute =
+  ChatWorkordersWorkOrderIdRouteImport.update({
+    id: '/$workOrderId',
+    path: '/$workOrderId',
+    getParentRoute: () => ChatWorkordersRoute,
+  } as any)
 const ChatDraftDraftIdRoute = ChatDraftDraftIdRouteImport.update({
   id: '/draft/$draftId',
   path: '/draft/$draftId',
@@ -184,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof WelcomeRoute
   '/new': typeof ChatNewRoute
   '/pull-requests': typeof ChatPullRequestsRoute
+  '/workorders': typeof ChatWorkordersRouteWithChildren
   '/projects/$projectKey': typeof ProjectsProjectKeyRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/archived': typeof SettingsArchivedRoute
@@ -201,6 +221,8 @@ export interface FileRoutesByFullPath {
   '/settings/storage': typeof SettingsStorageRoute
   '/$environmentId/$threadId': typeof ChatEnvironmentIdThreadIdRoute
   '/draft/$draftId': typeof ChatDraftDraftIdRoute
+  '/workorders/$workOrderId': typeof ChatWorkordersWorkOrderIdRoute
+  '/workorders/': typeof ChatWorkordersIndexRoute
 }
 export interface FileRoutesByTo {
   '/connect': typeof ConnectRoute
@@ -229,6 +251,8 @@ export interface FileRoutesByTo {
   '/': typeof ChatIndexRoute
   '/$environmentId/$threadId': typeof ChatEnvironmentIdThreadIdRoute
   '/draft/$draftId': typeof ChatDraftDraftIdRoute
+  '/workorders/$workOrderId': typeof ChatWorkordersWorkOrderIdRoute
+  '/workorders': typeof ChatWorkordersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -241,6 +265,7 @@ export interface FileRoutesById {
   '/welcome': typeof WelcomeRoute
   '/_chat/new': typeof ChatNewRoute
   '/_chat/pull-requests': typeof ChatPullRequestsRoute
+  '/_chat/workorders': typeof ChatWorkordersRouteWithChildren
   '/projects/$projectKey': typeof ProjectsProjectKeyRoute
   '/settings/appearance': typeof SettingsAppearanceRoute
   '/settings/archived': typeof SettingsArchivedRoute
@@ -259,6 +284,8 @@ export interface FileRoutesById {
   '/_chat/': typeof ChatIndexRoute
   '/_chat/$environmentId/$threadId': typeof ChatEnvironmentIdThreadIdRoute
   '/_chat/draft/$draftId': typeof ChatDraftDraftIdRoute
+  '/_chat/workorders/$workOrderId': typeof ChatWorkordersWorkOrderIdRoute
+  '/_chat/workorders/': typeof ChatWorkordersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -272,6 +299,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/new'
     | '/pull-requests'
+    | '/workorders'
     | '/projects/$projectKey'
     | '/settings/appearance'
     | '/settings/archived'
@@ -289,6 +317,8 @@ export interface FileRouteTypes {
     | '/settings/storage'
     | '/$environmentId/$threadId'
     | '/draft/$draftId'
+    | '/workorders/$workOrderId'
+    | '/workorders/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/connect'
@@ -317,6 +347,8 @@ export interface FileRouteTypes {
     | '/'
     | '/$environmentId/$threadId'
     | '/draft/$draftId'
+    | '/workorders/$workOrderId'
+    | '/workorders'
   id:
     | '__root__'
     | '/_chat'
@@ -328,6 +360,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/_chat/new'
     | '/_chat/pull-requests'
+    | '/_chat/workorders'
     | '/projects/$projectKey'
     | '/settings/appearance'
     | '/settings/archived'
@@ -346,6 +379,8 @@ export interface FileRouteTypes {
     | '/_chat/'
     | '/_chat/$environmentId/$threadId'
     | '/_chat/draft/$draftId'
+    | '/_chat/workorders/$workOrderId'
+    | '/_chat/workorders/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -522,6 +557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_chat/workorders': {
+      id: '/_chat/workorders'
+      path: '/workorders'
+      fullPath: '/workorders'
+      preLoaderRoute: typeof ChatWorkordersRouteImport
+      parentRoute: typeof ChatRoute
+    }
     '/_chat/pull-requests': {
       id: '/_chat/pull-requests'
       path: '/pull-requests'
@@ -535,6 +577,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/new'
       preLoaderRoute: typeof ChatNewRouteImport
       parentRoute: typeof ChatRoute
+    }
+    '/_chat/workorders/': {
+      id: '/_chat/workorders/'
+      path: '/'
+      fullPath: '/workorders/'
+      preLoaderRoute: typeof ChatWorkordersIndexRouteImport
+      parentRoute: typeof ChatWorkordersRoute
+    }
+    '/_chat/workorders/$workOrderId': {
+      id: '/_chat/workorders/$workOrderId'
+      path: '/$workOrderId'
+      fullPath: '/workorders/$workOrderId'
+      preLoaderRoute: typeof ChatWorkordersWorkOrderIdRouteImport
+      parentRoute: typeof ChatWorkordersRoute
     }
     '/_chat/draft/$draftId': {
       id: '/_chat/draft/$draftId'
@@ -553,9 +609,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ChatWorkordersRouteChildren {
+  ChatWorkordersWorkOrderIdRoute: typeof ChatWorkordersWorkOrderIdRoute
+  ChatWorkordersIndexRoute: typeof ChatWorkordersIndexRoute
+}
+
+const ChatWorkordersRouteChildren: ChatWorkordersRouteChildren = {
+  ChatWorkordersWorkOrderIdRoute: ChatWorkordersWorkOrderIdRoute,
+  ChatWorkordersIndexRoute: ChatWorkordersIndexRoute,
+}
+
+const ChatWorkordersRouteWithChildren = ChatWorkordersRoute._addFileChildren(
+  ChatWorkordersRouteChildren,
+)
+
 interface ChatRouteChildren {
   ChatNewRoute: typeof ChatNewRoute
   ChatPullRequestsRoute: typeof ChatPullRequestsRoute
+  ChatWorkordersRoute: typeof ChatWorkordersRouteWithChildren
   ChatIndexRoute: typeof ChatIndexRoute
   ChatEnvironmentIdThreadIdRoute: typeof ChatEnvironmentIdThreadIdRoute
   ChatDraftDraftIdRoute: typeof ChatDraftDraftIdRoute
@@ -564,6 +635,7 @@ interface ChatRouteChildren {
 const ChatRouteChildren: ChatRouteChildren = {
   ChatNewRoute: ChatNewRoute,
   ChatPullRequestsRoute: ChatPullRequestsRoute,
+  ChatWorkordersRoute: ChatWorkordersRouteWithChildren,
   ChatIndexRoute: ChatIndexRoute,
   ChatEnvironmentIdThreadIdRoute: ChatEnvironmentIdThreadIdRoute,
   ChatDraftDraftIdRoute: ChatDraftDraftIdRoute,

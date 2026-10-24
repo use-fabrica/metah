@@ -5,6 +5,7 @@ import {
   type EnvironmentId,
   type ClientGuardedRpcTag,
   ORCHESTRATION_V2_WS_METHODS,
+  WORK_ORDER_WS_METHODS,
   WS_METHODS,
 } from "@t3tools/contracts";
 import * as Cause from "effect/Cause";
@@ -72,6 +73,8 @@ export type EnvironmentSubscriptionRpcTag =
   | typeof WS_METHODS.subscribeVcsStatus
   | typeof WS_METHODS.subscribeWorktreeSetup
   | typeof WS_METHODS.subscribeProjectClones
+  | typeof WORK_ORDER_WS_METHODS.subscribeList
+  | typeof WORK_ORDER_WS_METHODS.subscribeDetail
   | typeof WS_METHODS.terminalAttach
   | typeof WS_METHODS.terminalObserve;
 
