@@ -18,6 +18,34 @@ _Avoid_: interview, requirements gathering
 The settled written agreement of what will be built and why. The parent of every Ticket in a WorkOrder.
 _Avoid_: plan, PRD, design doc
 
+**Stage**:
+Where a WorkOrder stands in the pipeline: Grilling, Spec, Tickets, Running, Review, or Done.
+_Avoid_: phase, column, status
+
+**Gate**:
+The user's confirmation that admits a WorkOrder to its next Stage. The only way a Stage advances.
+_Avoid_: approval step, checkpoint
+
+**Brief**:
+The metah-written opening message of a Session: its Stage's skills plus the full text of everything it needs, such as a Run's Ticket and the Spec.
+_Avoid_: prompt, instructions
+
+**Planning Session**:
+The single Session in which a WorkOrder's Grilling, Spec, and Ticket Graph are produced, in one unbroken context.
+_Avoid_: grill session, spec session
+
+**Parked**:
+The state of a WorkOrder whose Grilling is suspended on a question that only a prototype can answer.
+_Avoid_: blocked, paused
+
+**Review**:
+The stage after a Ticket Graph completes, in which the Integration Branch is checked against the Spec and the repo's coding standards, ending in the user's acceptance.
+_Avoid_: QA, code review stage
+
+**Fix Run**:
+The single Run that addresses a Review's findings.
+_Avoid_: patch run, follow-up
+
 ### Tickets
 
 **Ticket**:
@@ -41,7 +69,7 @@ A per-WorkOrder setting that lets Runs start without per-Ticket approval.
 _Avoid_: auto-merge, yolo mode
 
 **Tracker**:
-The configured store where a repo's Tickets are published and resolved. Local files by default.
+The store where a WorkOrder's Spec, Tickets, and Review findings are published and resolved. Owned by metah, never committed to the target repo.
 _Avoid_: issue tracker, backlog
 
 ### Agents and Git
@@ -49,6 +77,10 @@ _Avoid_: issue tracker, backlog
 **Session**:
 One conversation with an agent. A WorkOrder contains many Sessions; never use "session" for the WorkOrder itself.
 _Avoid_: chat, thread
+
+**Skill Pack**:
+The pinned set of skills metah supplies to every Session, from outside the target repo.
+_Avoid_: plugins, prompts
 
 **Integration Branch**:
 The branch inside a WorkOrder's worktree that completed Runs merge into.
