@@ -220,6 +220,7 @@ import {
   OrchestrationV2RpcSchemas,
   OrchestrationV2ThreadLaunchError,
 } from "./orchestrationV2.ts";
+import { WorkOrderRpcs } from "./workOrder.ts";
 import {
   ProjectCreateNewInput,
   ProjectCreateNewResult,
@@ -2088,4 +2089,5 @@ export const WsRpcGroup = RpcGroup.make(
   WsOrchestrationV2SubscribeShellRpc,
   WsOrchestrationV2SubscribeThreadRpc,
   WsOrchestrationV2SubscribeCommandOutputRpc,
+  ...WorkOrderRpcs,
 ).middleware(RpcScopeAuthorization);
